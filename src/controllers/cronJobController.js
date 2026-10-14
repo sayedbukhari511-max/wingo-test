@@ -9,178 +9,89 @@ import cron from "node-cron";
 import vipController from "./vipController.js";
 import gameController from "./gameController.js";
 
-const cronJobGame1p = (io) => {
-  cron.schedule("*/1 * * * *", async () => {
-    await trxWingoController.addTrxWingo(1);
-    await trxWingoController.handlingTrxWingo1P(1);
-    const [trxWingo] = await connection.execute(
-      `SELECT * FROM trx_wingo_game WHERE game = '${TRX_WINGO_GAME_TYPE_MAP.MIN_1}' ORDER BY id DESC LIMIT 2`,
-      [],
-    );
-    io.emit("data-server-trx-wingo", { data: trxWingo });
+const GAME_ROUND_CONFIG = {
+  1: { trx: TRX_WINGO_GAME_TYPE_MAP.MIN_1, wingo: "wingo" },
+  3: { trx: TRX_WINGO_GAME_TYPE_MAP.MIN_3, wingo: "wingo3" },
+  5: { trx: TRX_WINGO_GAME_TYPE_MAP.MIN_5, wingo: "wingo5" },
+  10: { trx: TRX_WINGO_GAME_TYPE_MAP.MIN_10, wingo: "wingo10" },
+};
 
-    await winGoController.addWinGo(1);
-    await winGoController.handlingWinGo1P(1);
-    const [winGo1] = await connection.execute(
-      'SELECT * FROM `wingo` WHERE `game` = "wingo" ORDER BY `id` DESC LIMIT 2 ',
-      [],
-    );
-    const data = winGo1;
-    io.emit("data-server", { data: data });
+// Settles the current round and opens the next one for every game of the given duration.
+// `emit` pushes the latest results to connected clients when a socket server is available.
+const runGameRound = async (minutes, emit = () => {}) => {
+  const { trx, wingo } = GAME_ROUND_CONFIG[minutes];
 
-    await k5Controller.add5D(1);
-    await k5Controller.handling5D(1);
-    const [k5D] = await connection.execute(
-      "SELECT * FROM 5d WHERE `game` = 1 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data2 = k5D;
-    io.emit("data-server-5d", { data: data2, game: "1" });
-
-    await k3Controller.addK3(1);
-    await k3Controller.handlingK3(1);
-    const [k3] = await connection.execute(
-      "SELECT * FROM k3 WHERE `game` = 1 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data3 = k3;
-    io.emit("data-server-k3", { data: data3, game: "1" });
-  });
-
-  cron.schedule("*/3 * * * *", async () => {
-    await trxWingoController.addTrxWingo(3);
-    await trxWingoController.handlingTrxWingo1P(3);
-    const [trxWingo] = await connection.execute(
-      `SELECT * FROM trx_wingo_game WHERE game = '${TRX_WINGO_GAME_TYPE_MAP.MIN_3}' ORDER BY id DESC LIMIT 2`,
-      [],
-    );
-    io.emit("data-server-trx-wingo", { data: trxWingo });
-
-    await winGoController.addWinGo(3);
-    await winGoController.handlingWinGo1P(3);
-    const [winGo1] = await connection.execute(
-      'SELECT * FROM `wingo` WHERE `game` = "wingo3" ORDER BY `id` DESC LIMIT 2 ',
-      [],
-    );
-    const data = winGo1;
-    io.emit("data-server", { data: data });
-
-    await k5Controller.add5D(3);
-    await k5Controller.handling5D(3);
-    const [k5D] = await connection.execute(
-      "SELECT * FROM 5d WHERE `game` = 3 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data2 = k5D;
-    io.emit("data-server-5d", { data: data2, game: "3" });
-
-    await k3Controller.addK3(3);
-    await k3Controller.handlingK3(3);
-    const [k3] = await connection.execute(
-      "SELECT * FROM k3 WHERE `game` = 3 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data3 = k3;
-    io.emit("data-server-k3", { data: data3, game: "3" });
-  });
-
-  cron.schedule("*/5 * * * *", async () => {
-    await trxWingoController.addTrxWingo(5);
-    await trxWingoController.handlingTrxWingo1P(5);
-    const [trxWingo] = await connection.execute(
-      `SELECT * FROM trx_wingo_game WHERE game = '${TRX_WINGO_GAME_TYPE_MAP.MIN_5}' ORDER BY id DESC LIMIT 2`,
-      [],
-    );
-    io.emit("data-server-trx-wingo", { data: trxWingo });
-
-    await winGoController.addWinGo(5);
-    await winGoController.handlingWinGo1P(5);
-    const [winGo1] = await connection.execute(
-      'SELECT * FROM `wingo` WHERE `game` = "wingo5" ORDER BY `id` DESC LIMIT 2 ',
-      [],
-    );
-    const data = winGo1;
-    io.emit("data-server", { data: data });
-
-    await k5Controller.add5D(5);
-    await k5Controller.handling5D(5);
-    const [k5D] = await connection.execute(
-      "SELECT * FROM 5d WHERE `game` = 5 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data2 = k5D;
-    io.emit("data-server-5d", { data: data2, game: "5" });
-
-    await k3Controller.addK3(5);
-    await k3Controller.handlingK3(5);
-    const [k3] = await connection.execute(
-      "SELECT * FROM k3 WHERE `game` = 5 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data3 = k3;
-    io.emit("data-server-k3", { data: data3, game: "5" });
-  });
-
-  cron.schedule("*/10 * * * *", async () => {
-    await trxWingoController.addTrxWingo(10);
-    await trxWingoController.handlingTrxWingo1P(10);
-    const [trxWingo] = await connection.execute(
-      `SELECT * FROM trx_wingo_game WHERE game = '${TRX_WINGO_GAME_TYPE_MAP.MIN_10}' ORDER BY id DESC LIMIT 2`,
-      [],
-    );
-    io.emit("data-server-trx-wingo", { data: trxWingo });
-
-    await winGoController.addWinGo(10);
-    await winGoController.handlingWinGo1P(10);
-    const [winGo1] = await connection.execute(
-      'SELECT * FROM `wingo` WHERE `game` = "wingo10" ORDER BY `id` DESC LIMIT 2 ',
-      [],
-    );
-    const data = winGo1;
-    io.emit("data-server", { data: data });
-
-    await k5Controller.add5D(10);
-    await k5Controller.handling5D(10);
-    const [k5D] = await connection.execute(
-      "SELECT * FROM 5d WHERE `game` = 10 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data2 = k5D;
-    io.emit("data-server-5d", { data: data2, game: "10" });
-
-    await k3Controller.addK3(10);
-    await k3Controller.handlingK3(10);
-    const [k3] = await connection.execute(
-      "SELECT * FROM k3 WHERE `game` = 10 ORDER BY `id` DESC LIMIT 2 ",
-      [],
-    );
-    const data3 = k3;
-    io.emit("data-server-k3", { data: data3, game: "10" });
-  });
-
-  cron.schedule("0 1 * * *", async () => {
-    await connection.execute("UPDATE users SET roses_today = ?", [0]);
-    await connection.execute("UPDATE point_list SET money = ?", [0]);
-    await connection.execute("UPDATE turn_over SET daily_turn_over = ?", [0]);
-  });
-
-  cron.schedule("0 3 * * *", async () => {
-    gameController.autoCleanOldGames();
-  });
-
-  cron.schedule("0 2 1 * *", async () => {
-    vipController.releaseVIPLevel();
-  });
-
-  cron.schedule(
-    "0 0 * * *",
-    async () => await winGoController.distributeCommission(),
+  await trxWingoController.addTrxWingo(minutes);
+  await trxWingoController.handlingTrxWingo1P(minutes);
+  const [trxWingo] = await connection.execute(
+    `SELECT * FROM trx_wingo_game WHERE game = '${trx}' ORDER BY id DESC LIMIT 2`,
+    [],
   );
-  // cron.schedule('* * * * *', async () => await winGoController.distributeCommission());
+  emit("data-server-trx-wingo", { data: trxWingo });
+
+  await winGoController.addWinGo(minutes);
+  await winGoController.handlingWinGo1P(minutes);
+  const [winGo] = await connection.execute(
+    "SELECT * FROM `wingo` WHERE `game` = ? ORDER BY `id` DESC LIMIT 2 ",
+    [wingo],
+  );
+  emit("data-server", { data: winGo });
+
+  await k5Controller.add5D(minutes);
+  await k5Controller.handling5D(minutes);
+  const [k5D] = await connection.execute(
+    "SELECT * FROM 5d WHERE `game` = ? ORDER BY `id` DESC LIMIT 2 ",
+    [minutes],
+  );
+  emit("data-server-5d", { data: k5D, game: String(minutes) });
+
+  await k3Controller.addK3(minutes);
+  await k3Controller.handlingK3(minutes);
+  const [k3] = await connection.execute(
+    "SELECT * FROM k3 WHERE `game` = ? ORDER BY `id` DESC LIMIT 2 ",
+    [minutes],
+  );
+  emit("data-server-k3", { data: k3, game: String(minutes) });
+};
+
+const resetDailyCounters = async () => {
+  await connection.execute("UPDATE users SET roses_today = ?", [0]);
+  await connection.execute("UPDATE point_list SET money = ?", [0]);
+  await connection.execute("UPDATE turn_over SET daily_turn_over = ?", [0]);
+};
+
+const cleanOldGames = async () => {
+  await gameController.autoCleanOldGames();
+};
+
+const releaseVIPLevel = async () => {
+  await vipController.releaseVIPLevel();
+};
+
+const distributeCommission = async () => {
+  await winGoController.distributeCommission();
+};
+
+const cronJobGame1p = (io) => {
+  const emit = (event, payload) => io.emit(event, payload);
+
+  cron.schedule("*/1 * * * *", () => runGameRound(1, emit));
+  cron.schedule("*/3 * * * *", () => runGameRound(3, emit));
+  cron.schedule("*/5 * * * *", () => runGameRound(5, emit));
+  cron.schedule("*/10 * * * *", () => runGameRound(10, emit));
+  cron.schedule("0 1 * * *", resetDailyCounters);
+  cron.schedule("0 3 * * *", cleanOldGames);
+  cron.schedule("0 2 1 * *", releaseVIPLevel);
+  cron.schedule("0 0 * * *", distributeCommission);
 };
 
 const cronJobController = {
   cronJobGame1p,
+  runGameRound,
+  resetDailyCounters,
+  cleanOldGames,
+  releaseVIPLevel,
+  distributeCommission,
 };
 
 export default cronJobController;

@@ -1,0 +1,23 @@
+[build]
+  command = ""
+  publish = "src/public"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["bcrypt", "ejs"]
+  included_files = ["src/views/**"]
+
+# There is no socket server on Netlify; answer reconnect attempts at the CDN
+[[redirects]]
+  from = "/socket.io/*"
+  to = "/404"
+  status = 404
+  force = true
+
+# Static files in src/public are served directly by the CDN;
+# everything else is handled by the Express app.
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
