@@ -144,3 +144,7 @@ export function getBonuses(amount) {
     return { selfBonus: 0, uplineBonus: 0 };
   }
 }
+
+
+
+//sayed//
